@@ -1,0 +1,29 @@
+{
+  "project_info": {
+    "project_number": "783703710679",
+    "project_id": "rakeb-d70ee",
+    "storage_bucket": "rakeb-d70ee.firebasestorage.app"
+  },
+  "client": [
+    {
+      "client_info": {
+        "mobilesdk_app_id": "1:783703710679:android:8d190839ed1dd858dc0992",
+        "android_client_info": {
+          "package_name": "com.hooob"
+        }
+      },
+      "oauth_client": [],
+      "api_key": [
+        {
+          "current_key": "AIzaSyBOihWpOQ_DCdQV-E_2gu3VZ-Kexebi6YE"
+        }
+      ],
+      "services": {
+        "appinvite_service": {
+          "other_platform_oauth_client": []
+        }
+      }
+    }
+  ],
+  "configuration_version": "1"
+}

@@ -1,0 +1,2 @@
+C:/Users/Romuo/StudioProjects/7_rakeb_user_app/android/app/.cxx/Debug/29181z3q/x86/CMakeFiles/edit_cache.dir
+C:/Users/Romuo/StudioProjects/7_rakeb_user_app/android/app/.cxx/Debug/29181z3q/x86/CMakeFiles/rebuild_cache.dir

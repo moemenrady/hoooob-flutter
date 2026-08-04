@@ -1,0 +1,252 @@
+import 'package:flutter/material.dart';
+import 'package:get/get.dart';
+import 'package:hoooob_app/common_widgets/button_widget.dart';
+import 'package:hoooob_app/common_widgets/custom_text_field.dart';
+import 'package:hoooob_app/features/payment/controllers/payment_controller.dart';
+import 'package:hoooob_app/features/payment/screens/payment_web_view_screen.dart';
+import 'package:hoooob_app/util/dimensions.dart';
+import 'package:hoooob_app/util/images.dart';
+import 'package:hoooob_app/util/styles.dart';
+import 'package:hoooob_app/util/animation_helper.dart';
+
+class PaymentMethodWidget extends StatefulWidget {
+  const PaymentMethodWidget({super.key});
+
+  @override
+  State<PaymentMethodWidget> createState() => _PaymentMethodWidgetState();
+}
+
+class _PaymentMethodWidgetState extends State<PaymentMethodWidget>
+    with TickerProviderStateMixin {
+  int expandedIndex = -1;
+  @override
+  void initState() {
+    super.initState();
+    Get.find<PaymentController>().getPaymentGetWayList();
+  }
+
+  @override
+  Widget build(BuildContext context) {
+    var size = MediaQuery.of(context).size;
+
+    return Column(
+      crossAxisAlignment: CrossAxisAlignment.start,
+      children: [
+        _titleSection(),
+        const SizedBox(height: 15),
+        _paymentList(size),
+      ],
+    );
+  }
+
+  /// =========================
+  /// Title Section
+  /// =========================
+  Widget _titleSection() {
+    return AnimationHelper.titleAnimation(
+      child: Text(
+        'وسيلة الدفع',
+        style: textBold.copyWith(
+          color: Theme.of(context).textTheme.labelLarge!.color,
+          fontSize: Dimensions.fontSizeLarge,
+        ),
+      ),
+    );
+  }
+
+  /// =========================
+  /// Payment Methods List
+  /// =========================
+  Widget _paymentList(Size size) {
+    return GetBuilder<PaymentController>(
+      builder: (controller) {
+        if (controller.paymentGateways == null ||
+            controller.paymentGateways!.isEmpty) {
+          return const Center(child: CircularProgressIndicator());
+        }
+
+        return ConstrainedBox(
+          constraints: BoxConstraints(
+            maxHeight: MediaQuery.of(context).size.height * 0.6, 
+          ),
+          child: ListView.builder(
+            shrinkWrap: true,
+            physics: const BouncingScrollPhysics(),
+            itemCount: controller.paymentGateways!.length,
+            itemBuilder: (context, index) {
+              return AnimationHelper.cardAnimation(
+                index: index,
+                child: _paymentCard(index, size,
+                    controller.paymentGateways![index].gateway ?? ''),
+              );
+            },
+          ),
+        );
+      },
+    );
+  }
+
+  /// =========================
+  /// Single Payment Card
+  /// =========================
+  Widget _paymentCard(int index, Size size, String gateway) {
+    bool isExpanded = expandedIndex == index;
+
+    return GestureDetector(
+      onTap: () {
+        setState(() {
+          expandedIndex = isExpanded ? -1 : index;
+        });
+      },
+      child: AnimatedContainer(
+        duration: const Duration(milliseconds: 350),
+        curve: Curves.easeInOut,
+        width: size.width,
+        padding: EdgeInsets.symmetric(
+          horizontal: size.width * 0.04,
+          vertical: size.width * 0.03,
+        ),
+        margin: EdgeInsets.symmetric(vertical: size.width * 0.02),
+        decoration: BoxDecoration(
+          borderRadius: BorderRadius.circular(Dimensions.paddingSizeDefault),
+          color: Theme.of(context).cardColor,
+          boxShadow: [
+            BoxShadow(
+              color: Theme.of(context).hintColor.withValues(alpha: 0.2),
+              blurRadius: 25,
+              spreadRadius: 1,
+              offset: const Offset(1, 5),
+            ),
+          ],
+        ),
+        child: Column(
+          children: [
+            _paymentHeader(index, size, isExpanded),
+
+            /// Smooth expand animation
+            AnimatedSize(
+              duration: const Duration(milliseconds: 350),
+              curve: Curves.easeInOut,
+              child: isExpanded
+                  ? _paymentExpandedContent(size, gateway)
+                  : const SizedBox(),
+            ),
+          ],
+        ),
+      ),
+    );
+  }
+
+  /// =========================
+  /// Payment Header
+  /// =========================
+  Widget _paymentHeader(int index, Size size, bool isExpanded) {
+    final gateway = Get.find<PaymentController>().paymentGateways![index];
+
+    return Row(
+      children: [
+        // CircleAvatar(
+        //   maxRadius: size.width * 0.045,
+        //   backgroundColor: Theme.of(context).primaryColorLight,
+        //   child: Padding(
+        //     padding: const EdgeInsets.all(6),
+        //     child: Image.network(
+        //       "https://hoooob.com/storage/payment-gateway/${gateway.gatewayImage}",
+        //       fit: BoxFit.contain,
+        //     ),
+        //   ),
+        // ),
+        CircleAvatar(
+          maxRadius: size.width * 0.045,
+          backgroundColor: Theme.of(context).primaryColorLight,
+          child: Center(
+            child: Image.asset(
+              Images.notification1,
+              width: size.width * 0.06,
+            ),
+          ),
+        ),
+        SizedBox(width: size.width * 0.03),
+
+        Expanded(
+          child: Text(
+            gateway.gatewayTitle ?? gateway.gateway ?? "",
+            style: textBold.copyWith(
+              fontSize: Dimensions.fontSizeDefault,
+              color: Theme.of(context).textTheme.labelLarge!.color,
+            ),
+          ),
+        ),
+
+        AnimatedRotation(
+          turns: isExpanded ? 0.5 : 0,
+          duration: const Duration(milliseconds: 300),
+          child: Icon(
+            Icons.keyboard_arrow_down,
+            size: size.width * 0.06,
+            color: Theme.of(context).textTheme.headlineLarge!.color,
+          ),
+        ),
+      ],
+    );
+  }
+
+  /// =========================
+  /// Expanded Content
+  /// =========================
+  Widget _paymentExpandedContent(Size size, String paymentId) {
+    final controller = Get.find<PaymentController>();
+    return Padding(
+      padding: EdgeInsets.only(top: size.height * 0.02),
+      child: Column(
+        children: [
+          Row(
+            children: [
+              Expanded(
+                child: CustomTextField(
+                  borderRadius: 15,
+                  showBorder: true,
+                  hintText: 'write_add_money'.tr,
+                ),
+              ),
+              SizedBox(width: size.width * 0.04),
+              Text(
+                'EG',
+                style: textBold.copyWith(
+                  color: Theme.of(context).textTheme.labelLarge!.color,
+                ),
+              ),
+            ],
+          ),
+          SizedBox(height: size.height * 0.025),
+          Align(
+            alignment: Alignment.centerLeft,
+            child: AnimationHelper.buttonAnimation(
+              isVisible: true,
+              child: ButtonWidget(
+                radius: 40,
+                buttonText: 'deposit'.tr,
+                backgroundColor: Theme.of(context).primaryColor,
+                width: size.width * 0.4,
+                height: size.height * 0.05,
+                onPressed: () async {
+                  final iframeUrl =
+                      "https://accept.paymob.com/unifiedcheckout/?publicKey=egy_pk_live_AfLEs69u7bqoB6HY7EugeRJ7EAunVWxY&clientSecret=egy_csk_live_f1ad5069fd9eeb9a0d5577ea0f8c9d82";
+                  Get.to(() => PaymentWebViewScreen(url: iframeUrl));
+                },
+              ),
+            ),
+          ),
+        ],
+      ),
+    );
+  }
+}
+
+List<String> paymentMethodText = [
+  "انستا باي / حساب بنكي / محفظة \nهاتف",
+  "بطاقة بنكية",
+  "Paypal",
+  "Apple pay",
+  "Google pay",
+];

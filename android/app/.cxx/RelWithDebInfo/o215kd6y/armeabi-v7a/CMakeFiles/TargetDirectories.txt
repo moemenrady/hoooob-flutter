@@ -1,0 +1,2 @@
+D:/fassla/7_rakeb_user/android/app/.cxx/RelWithDebInfo/o215kd6y/armeabi-v7a/CMakeFiles/edit_cache.dir
+D:/fassla/7_rakeb_user/android/app/.cxx/RelWithDebInfo/o215kd6y/armeabi-v7a/CMakeFiles/rebuild_cache.dir

@@ -1,0 +1,46 @@
+[33m2194196[m[33m ([m[1;36mHEAD[m[33m -> [m[1;32mmain[m[33m, [m[1;31morigin/main[m[33m)[m Initial commit
+[33md6d44a3[m[33m ([m[1;31morigin/master[m[33m, [m[1;31morigin/HEAD[m[33m)[m last changes
+[33m6561bea[m finish first stage carpool
+[33m598f3aa[m Merge pull request #19 from fassla-software/finsh_details_tripe
+[33m75e9ad4[m[33m ([m[1;31morigin/finsh_details_tripe[m[33m)[m finsh_details_tripe
+[33m189ca98[m Merge pull request #18 from fassla-software/togel_tripes
+[33m268ed4f[m[33m ([m[1;31morigin/togel_tripes[m[33m)[m create_toqle_tripe
+[33m87d6a12[m Merge pull request #17 from fassla-software/create_vehicle_driver
+[33m7aa1927[m[33m ([m[1;31morigin/create_vehicle_driver[m[33m)[m link_api_with_driver_tripe
+[33ma51daeb[m Merge pull request #16 from fassla-software/add_vehicle_in_add_tripe
+[33mac3a6ca[m[33m ([m[1;31morigin/add_vehicle_in_add_tripe[m[33m)[m add_vehicel_in_add_tripe
+[33mddf5e79[m Merge pull request #15 from fassla-software/trips_details
+[33mfef55df[m[33m ([m[1;31morigin/trips_details[m[33m)[m add_data_in_tripe_user
+[33meb1ae41[m Merge pull request #14 from fassla-software/done_create_tripe
+[33m0f27571[m[33m ([m[1;31morigin/done_create_tripe[m[33m)[m linke_search_tripe_with_api
+[33mcdf2f59[m done_create_account
+[33m203db46[m Merge pull request #13 from fassla-software/link_add_tripe_withPapi
+[33m042f8be[m[33m ([m[1;31morigin/link_add_tripe_withPapi[m[33m)[m add tripe api
+[33med79653[m Merge pull request #12 from fassla-software/link_add_tripe_withPapi
+[33m704a036[m link_api_add_tripe
+[33m5711105[m Merge pull request #11 from fassla-software/feature/wallet
+[33m1e654aa[m[33m ([m[1;31morigin/feature/wallet[m[33m)[m create_wallet
+[33m14811db[m Merge pull request #10 from fassla-software/rafctor_ui_trip
+[33m0ed8262[m[33m ([m[1;31morigin/rafctor_ui_trip[m[33m)[m change_user_icon
+[33mdd2e427[m refactor_ui_trip
+[33m3dd2bca[m Merge pull request #9 from fassla-software/feature/my_vehicle
+[33m90c9fbb[m[33m ([m[1;31morigin/feature/my_vehicle[m[33m)[m refactro_add_vehicle
+[33m17d19d3[m Merge pull request #8 from fassla-software/feature/my_tripe
+[33m5a4c264[m[33m ([m[1;31morigin/feature/my_tripe[m[33m)[m create my tripe
+[33mb7088fa[m Merge pull request #7 from fassla-software/map-screen-preview-trip-screen
+[33meceb233[m[33m ([m[1;31morigin/map-screen-preview-trip-screen[m[33m)[m add location controller
+[33md2aa8d6[m some missed files
+[33me242bc2[m map-screen-preview-trip-screen
+[33m7103f89[m Merge pull request #6 from fassla-software/feature/add_tripe
+[33m68f4bdb[m[33m ([m[1;31morigin/feature/add_tripe[m[33m)[m craeet_drop_down_add_tripe
+[33m133cd3e[m Merge pull request #5 from fassla-software/feature/add_tripe
+[33m7472b51[m Merge pull request #4 from fassla-software/feature/details_tripe_screen
+[33me9b5a2c[m craete_add_tripe
+[33m5ec1874[m[33m ([m[1;31morigin/feature/details_tripe_screen[m[33m)[m create_details_tripe_screen
+[33mc2cb0e3[m Merge pull request #3 from fassla-software/feature/search_tripe
+[33m8ae5b06[m[33m ([m[1;31morigin/feature/search_tripe[m[33m)[m create_search_tripe_screen
+[33m9f532a3[m Merge pull request #2 from fassla-software/feature/home_screen
+[33mdbc527e[m Merge pull request #1 from fassla-software/feature/add_car
+[33m0d1f40a[m[33m ([m[1;31morigin/feature/home_screen[m[33m)[m create_home_screen
+[33ma9e8e2d[m[33m ([m[1;31morigin/feature/add_car[m[33m)[m create_add_car
+[33m17c7eb3[m lunching_project

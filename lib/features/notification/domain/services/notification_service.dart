@@ -1,0 +1,14 @@
+import 'package:hoooob_app/features/notification/domain/repositories/notification_repository_interface.dart';
+import 'package:hoooob_app/features/notification/domain/services/notification_service_interface.dart';
+
+class NotificationService implements NotificationServiceInterface{
+  NotificationRepositoryInterface notificationRepositoryInterface;
+
+  NotificationService({required this.notificationRepositoryInterface});
+
+  @override
+  Future getList({int? offset = 1}) async{
+    return await notificationRepositoryInterface.getList(offset: offset);
+  }
+
+}

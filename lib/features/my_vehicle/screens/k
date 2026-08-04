@@ -1,0 +1,762 @@
+import 'dart:io';
+import 'package:hoooob_app/common_widgets/app_bar_widget.dart';
+import 'package:hoooob_app/common_widgets/arrow_down_icon.dart';
+import 'package:hoooob_app/common_widgets/body_widget.dart';
+import 'package:hoooob_app/common_widgets/button_widget.dart';
+import 'package:hoooob_app/common_widgets/date_picker_widget.dart';
+import 'package:hoooob_app/data/api_client.dart';
+import 'package:hoooob_app/features/home/controllers/add_car_controller.dart';
+import 'package:hoooob_app/features/home/domain/models/add_car_body_model.dart';
+import 'package:hoooob_app/features/home/domain/models/add_car_brand_model.dart';
+import 'package:hoooob_app/features/home/domain/models/add_car_category.dart';
+import 'package:hoooob_app/features/home/domain/models/add_car_model.dart';
+import 'package:hoooob_app/features/my_vehicle/screens/not_have_vehicle_screen.dart';
+import 'package:hoooob_app/helper/display_helper.dart';
+import 'package:hoooob_app/util/dimensions.dart';
+import 'package:hoooob_app/util/images.dart';
+import 'package:hoooob_app/util/styles.dart';
+import 'package:file_picker/file_picker.dart';
+import 'package:flutter/material.dart';
+import 'package:flutter_spinkit/flutter_spinkit.dart';
+import 'package:get/get.dart';
+
+class AddVehicleScreen extends StatefulWidget {
+  final AddCarModel? vehicleInfo;
+
+  const AddVehicleScreen({super.key, this.vehicleInfo});
+
+  @override
+  State<AddVehicleScreen> createState() => _VehicleAddScreenState();
+}
+
+class _VehicleAddScreenState extends State<AddVehicleScreen> {
+  TextEditingController licencePlateNumberController = TextEditingController();
+  TextEditingController licenceExpiryDateController = TextEditingController();
+  TextEditingController vinNumberController = TextEditingController();
+  TextEditingController transmissionController = TextEditingController();
+  TextEditingController parcelWeightCapacity = TextEditingController();
+  final ScrollController _scrollController = ScrollController();
+
+  FocusNode licencePlateFocus = FocusNode();
+  FocusNode licenceExpiryFocus = FocusNode();
+  FocusNode vinNumberFocus = FocusNode();
+  FocusNode transmissionFocus = FocusNode();
+  FocusNode parcelWeightFocus = FocusNode();
+
+  PlatformFile? fileNamed;
+  File? file;
+  int? fileSize;
+
+  @override
+  void initState() {
+    Get.find<AddCarController>().getVehicleBrandList(1);
+    Get.find<AddCarController>().getCategoryList(1);
+    Get.find<AddCarController>().clearVehicleData();
+    if (widget.vehicleInfo != null) {
+      licencePlateNumberController.text =
+          widget.vehicleInfo!.licencePlateNumber!;
+      Get.find<AddCarController>()
+          .setStartDate(DateTime.parse(widget.vehicleInfo!.licenceExpireDate!));
+      Get.find<AddCarController>()
+          .setFuelType(widget.vehicleInfo!.fuelType!, false);
+      parcelWeightCapacity.text =
+          (widget.vehicleInfo?.parcelWeightCapacity ?? '').toString();
+    }
+    super.initState();
+  }
+
+  void _scrollDown() {
+    _scrollController.animateTo(
+      _scrollController.position.maxScrollExtent + 50,
+      duration: const Duration(seconds: 2),
+      curve: Curves.fastOutSlowIn,
+    );
+  }
+
+  @override
+  Widget build(BuildContext context) {
+    var size = MediaQuery.of(context).size;
+    return Scaffold(
+      body: BodyWidget(
+        appBar: AppBarWidget(
+          toolbarHeight: size.height * 0.1,
+          isShowIcon: true,
+          fontSize: Dimensions.fontSizeOverLarge,
+          fontWeight: FontWeight.w900,
+          title: widget.vehicleInfo == null
+              ? 'vehicle_setup'.tr
+              : 'update_vehicle'.tr,
+          height: 0,
+        ),
+        body: GetBuilder<AddCarController>(builder: (profileController) {
+          return profileController.isHaveCar.value == false
+              ? NotHaveVehicleCarScreen()
+              : ValueListenableBuilder(
+                  valueListenable: profileController.isHaveCar,
+                  builder: (context, value, child) {
+                    return value == false
+                        ? NotHaveVehicleCarScreen()
+                        : SingleChildScrollView(
+                            controller: _scrollController,
+                            child: Padding(
+                              padding: const EdgeInsets.symmetric(
+                                  horizontal: Dimensions.paddingSizeDefault),
+                              child: Column(
+                                  crossAxisAlignment: CrossAxisAlignment.start,
+                                  spacing: size.height * 0.02 + 5,
+                                  children: [
+                                    if (widget.vehicleInfo == null)
+                                      Padding(
+                                        padding: const EdgeInsets.only(
+                                          top: Dimensions.paddingSizeDefault,
+                                          bottom: Dimensions.paddingSizeDefault,
+                                        ),
+                                        child: Text('vehicle_information'.tr,
+                                            style: textHeavy.copyWith(
+                                              color: Theme.of(context)
+                                                  .primaryColorDark,
+                                              fontSize: Dimensions
+                                                      .fontSizeExtraLarge +
+                                                  4,
+                                            )),
+                                      ),
+                                    if (widget.vehicleInfo == null)
+                                      Text('add_vehicle_details'.tr,
+                                          style: textMedium.copyWith(
+                                              color: Theme.of(context)
+                                                  .textTheme
+                                                  .titleSmall!
+                                                  .color)),
+                                    Column(
+                                        crossAxisAlignment:
+                                            CrossAxisAlignment.start,
+                                        spacing: size.height * 0.02 + 5,
+                                        children: [
+                                          // TextFieldTitleWidget(title: 'vehicle_brand'.tr),
+                                          if (profileController
+                                              .brandList.isNotEmpty)
+                                            Container(
+                                              width: Get.width,
+                                              padding:
+                                                  const EdgeInsets.symmetric(
+                                                      horizontal: Dimensions
+                                                          .paddingSizeDefault),
+                                              decoration: BoxDecoration(
+                                                color:
+                                                    Theme.of(context).cardColor,
+                                                border: Border.all(
+                                                    width: .5,
+                                                    color: Theme.of(context)
+                                                        .hintColor),
+                                                borderRadius: BorderRadius
+                                                    .circular(Dimensions
+                                                        .paddingSizeDefault),
+                                              ),
+                                              child: DropdownButton(
+                                                icon: ArrowDownIcon(),
+                                                items: profileController
+                                                    .brandList
+                                                    .map((item) {
+                                                  return DropdownMenuItem<
+                                                      Brand>(
+                                                    value: item,
+                                                    child: Text(item.name!.tr,
+                                                        style: textRegular
+                                                            .copyWith(
+                                                          fontSize: Dimensions
+                                                              .fontSizeDefault,
+                                                          color:
+                                                              Theme.of(context)
+                                                                  .textTheme
+                                                                  .labelMedium!
+                                                                  .color,
+                                                        )),
+                                                  );
+                                                }).toList(),
+                                                onChanged: (newVal) {
+                                                  profileController
+                                                      .setBrandIndex(
+                                                          newVal!, true);
+                                                },
+                                                isExpanded: true,
+                                                underline: const SizedBox(),
+                                                value: profileController
+                                                        .selectedBrand ??
+                                                    Brand(
+                                                        id: 'abc',
+                                                        name:
+                                                            'Select Brand Model'),
+                                              ),
+                                            ),
+                                        ]),
+                                    Column(
+                                        crossAxisAlignment:
+                                            CrossAxisAlignment.start,
+                                        children: [
+                                          if (profileController
+                                              .modelList.isNotEmpty)
+                                            // TextFieldTitleWidget(),
+                                            if (profileController
+                                                .modelList.isNotEmpty)
+                                              Container(
+                                                width: Get.width,
+                                                padding: const EdgeInsets
+                                                    .symmetric(
+                                                    horizontal: Dimensions
+                                                        .paddingSizeDefault),
+                                                decoration: BoxDecoration(
+                                                  color: Theme.of(context)
+                                                      .cardColor,
+                                                  border: Border.all(
+                                                      width: .5,
+                                                      color: Theme.of(context)
+                                                          .hintColor),
+                                                  borderRadius: BorderRadius
+                                                      .circular(Dimensions
+                                                          .paddingSizeDefault),
+                                                ),
+                                                child: DropdownButton(
+                                                  icon: ArrowDownIcon(),
+                                                  items: profileController
+                                                      .modelList
+                                                      .map((item) {
+                                                    return DropdownMenuItem<
+                                                        VehicleModels>(
+                                                      value: item,
+                                                      child: Text(item.name!.tr,
+                                                          style: textRegular
+                                                              .copyWith(
+                                                            fontSize: Dimensions
+                                                                .fontSizeDefault,
+                                                            color: Theme.of(
+                                                                    context)
+                                                                .textTheme
+                                                                .labelMedium!
+                                                                .color,
+                                                          )),
+                                                    );
+                                                  }).toList(),
+                                                  onChanged: (newVal) {
+                                                    profileController
+                                                        .setModelIndex(
+                                                            newVal!, true);
+                                                  },
+                                                  isExpanded: true,
+                                                  underline: const SizedBox(),
+                                                  value: profileController
+                                                      .selectedModel,
+                                                ),
+                                              ),
+                                        ]),
+                                    // TextFieldTitleWidget(title: ''),
+                                    if (profileController
+                                        .categoryList.isNotEmpty)
+                                      // classification
+                                      Container(
+                                        width: Get.width,
+                                        padding: const EdgeInsets.symmetric(
+                                            horizontal:
+                                                Dimensions.paddingSizeDefault),
+                                        decoration: BoxDecoration(
+                                          color: Theme.of(context).cardColor,
+                                          border: Border.all(
+                                              width: .5,
+                                              color: Theme.of(context)
+                                                  .hintColor
+                                                  .withOpacity(.7)),
+                                          borderRadius: BorderRadius.circular(
+                                              Dimensions.paddingSizeDefault),
+                                        ),
+                                        child: DropdownButton(
+                                          icon: ArrowDownIcon(),
+                                          items: profileController.categoryList
+                                              .map((item) {
+                                            return DropdownMenuItem<Category>(
+                                              value: item,
+                                              child: Text(item.name!.tr,
+                                                  style: textRegular.copyWith(
+                                                    fontSize: Dimensions
+                                                        .fontSizeDefault,
+                                                    color: Theme.of(context)
+                                                        .textTheme
+                                                        .labelMedium!
+                                                        .color,
+                                                  )),
+                                            );
+                                          }).toList(),
+                                          onChanged: (newVal) {
+                                            profileController.setCategoryIndex(
+                                                newVal!, true);
+                                          },
+                                          isExpanded: true,
+                                          underline: const SizedBox(),
+                                          value: profileController
+                                              .selectedCategory,
+                                        ),
+                                      ),
+                                    // TextFieldTitleWidget(),
+                                    TextField(
+                                      controller: parcelWeightCapacity,
+                                      focusNode: parcelWeightFocus,
+                                      style: textRegular.copyWith(
+                                          fontSize: Dimensions.fontSizeDefault,
+                                          color: Theme.of(context)
+                                              .textTheme
+                                              .bodyMedium
+                                              ?.color),
+                                      textInputAction: TextInputAction.next,
+                                      keyboardType: TextInputType.text,
+                                      cursorColor:
+                                          Theme.of(context).primaryColor,
+                                      textCapitalization:
+                                          TextCapitalization.words,
+                                      autofocus: false,
+                                      decoration: InputDecoration(
+                                        enabledBorder: OutlineInputBorder(
+                                          borderRadius: BorderRadius.circular(
+                                              Dimensions.paddingSizeDefault),
+                                          borderSide: BorderSide(
+                                              width: 0.5,
+                                              color:
+                                                  Theme.of(context).hintColor),
+                                        ),
+                                        disabledBorder: OutlineInputBorder(
+                                          borderRadius: BorderRadius.circular(
+                                              Dimensions.paddingSizeDefault),
+                                          borderSide: BorderSide(
+                                              width: 0.5,
+                                              color:
+                                                  Theme.of(context).hintColor),
+                                        ),
+                                        focusedBorder: OutlineInputBorder(
+                                          borderRadius: BorderRadius.circular(
+                                              Dimensions.paddingSizeDefault),
+                                          borderSide: BorderSide(
+                                              width: 0.5,
+                                              color: Theme.of(context)
+                                                  .primaryColor),
+                                        ),
+                                        hintText: 'enter_color'.tr,
+                                        fillColor: Theme.of(context).cardColor,
+                                        hintStyle: textRegular.copyWith(
+                                            fontSize:
+                                                Dimensions.fontSizeDefault,
+                                            color: Theme.of(context)
+                                                .textTheme
+                                                .labelMedium!
+                                                .color!),
+                                        filled: true,
+                                      ),
+                                      onSubmitted: (text) =>
+                                          FocusScope.of(context)
+                                              .requestFocus(licencePlateFocus),
+                                    ),
+                                    // TextFieldTitleWidget(),
+                                    TextField(
+                                      controller: licencePlateNumberController,
+                                      focusNode: licencePlateFocus,
+                                      style: textRegular.copyWith(
+                                          fontSize: Dimensions.fontSizeDefault,
+                                          color: Theme.of(context)
+                                              .textTheme
+                                              .labelMedium
+                                              ?.color),
+                                      textInputAction: TextInputAction.next,
+                                      keyboardType: TextInputType.name,
+                                      cursorColor:
+                                          Theme.of(context).primaryColor,
+                                      textCapitalization:
+                                          TextCapitalization.words,
+                                      autofocus: false,
+                                      decoration: InputDecoration(
+                                        enabledBorder: OutlineInputBorder(
+                                          borderRadius: BorderRadius.circular(
+                                              Dimensions.paddingSizeDefault),
+                                          borderSide: BorderSide(
+                                              width: 0.5,
+                                              color:
+                                                  Theme.of(context).hintColor),
+                                        ),
+                                        disabledBorder: OutlineInputBorder(
+                                          borderRadius: BorderRadius.circular(
+                                              Dimensions.paddingSizeDefault),
+                                          borderSide: BorderSide(
+                                              width: 0.5,
+                                              color:
+                                                  Theme.of(context).hintColor),
+                                        ),
+                                        focusedBorder: OutlineInputBorder(
+                                          borderRadius: BorderRadius.circular(
+                                              Dimensions.paddingSizeDefault),
+                                          borderSide: BorderSide(
+                                              width: 0.5,
+                                              color: Theme.of(context)
+                                                  .primaryColor),
+                                        ),
+                                        hintText: 'vehicle_license_number'.tr,
+                                        fillColor: Theme.of(context).cardColor,
+                                        hintStyle: textRegular.copyWith(
+                                            fontSize:
+                                                Dimensions.fontSizeDefault,
+                                            color: Theme.of(context)
+                                                .textTheme
+                                                .labelMedium!
+                                                .color!),
+                                        filled: true,
+                                      ),
+                                      onSubmitted: (text) =>
+                                          FocusScope.of(context)
+                                              .requestFocus(licenceExpiryFocus),
+                                    ),
+                                    // const SizedBox(height: Dimensions.paddingSizeDefault),
+                                    DatePickerWidget(
+                                      // title: 'licence_expire_date'.tr,
+                                      text: profileController.startDate != null
+                                          ? profileController.dateFormat
+                                              .format(
+                                                  profileController.startDate!)
+                                              .toString()
+                                          : 'licence_expire_date'.tr,
+                                      image: Images.calender2Icon,
+
+                                      requiredField: false,
+                                      selectDate: () => profileController
+                                          .selectDate("start", context),
+                                    ),
+                                    // TextFieldTitleWidget(),
+                                    Container(
+                                      padding: const EdgeInsets.symmetric(
+                                          horizontal:
+                                              Dimensions.paddingSizeDefault),
+                                      decoration: BoxDecoration(
+                                        color: Theme.of(context).cardColor,
+                                        border: Border.all(
+                                            width: .7,
+                                            color: Theme.of(context).hintColor),
+                                        borderRadius: BorderRadius.circular(
+                                            Dimensions.paddingSizeDefault),
+                                      ),
+                                      child: DropdownButton<String>(
+                                        icon: ArrowDownIcon(),
+                                        value:
+                                            profileController.selectedFuelType,
+                                        items: profileController.fuelType
+                                            .map((String value) {
+                                          return DropdownMenuItem<String>(
+                                            value: value,
+                                            child: Text(value.tr,
+                                                style: textRegular.copyWith(
+                                                  fontSize: Dimensions
+                                                      .fontSizeDefault,
+                                                  color: Theme.of(context)
+                                                      .textTheme
+                                                      .labelMedium!
+                                                      .color,
+                                                )),
+                                          );
+                                        }).toList(),
+                                        onChanged: (value) {
+                                          profileController.setFuelType(
+                                              value!, true);
+                                        },
+                                        isExpanded: true,
+                                        underline: const SizedBox(),
+                                      ),
+                                    ),
+                                    if (widget.vehicleInfo == null)
+                                      _defaultAddDocument(
+                                          controller: profileController,
+                                          nameDocument:
+                                              'front_view_of_driver_license'.tr,
+                                          keyName:
+                                              'front_driver_licence_image'),
+                                    _defaultAddDocument(
+                                        controller: profileController,
+                                        nameDocument:
+                                            'photo_of_the_back_of_the_driver_license'
+                                                .tr,
+                                        keyName: 'back_driver_licence_image'),
+                                    _defaultAddDocument(
+                                        controller: profileController,
+                                        nameDocument:
+                                            'front_view_of_vehicle_license'.tr,
+                                        keyName: 'front_car_licence_image'),
+                                    _defaultAddDocument(
+                                        controller: profileController,
+                                        nameDocument:
+                                            'photo_of_the_back_of_the_vehicle_license'
+                                                .tr,
+                                        keyName: 'back_car_licence_image'),
+
+                                    if (profileController
+                                        .listOfDocuments.isNotEmpty)
+                                      ListView.builder(
+                                        itemCount: profileController
+                                            .listOfDocuments.length,
+                                        shrinkWrap: true,
+                                        padding: EdgeInsets.zero,
+                                        physics:
+                                            const NeverScrollableScrollPhysics(),
+                                        itemBuilder: (context, index) {
+                                          return InkWell(
+                                            onTap: () => profileController
+                                                .removeFile(profileController
+                                                    .listOfDocuments[index]
+                                                    .key),
+                                            child: Padding(
+                                              padding:
+                                                  const EdgeInsets.fromLTRB(
+                                                      0,
+                                                      Dimensions
+                                                          .paddingSizeDefault,
+                                                      0,
+                                                      0),
+                                              child: Container(
+                                                decoration: BoxDecoration(
+                                                  borderRadius: BorderRadius
+                                                      .circular(Dimensions
+                                                          .paddingSizeExtraLarge),
+                                                  color: Theme.of(context)
+                                                      .cardColor,
+                                                  boxShadow: [
+                                                    BoxShadow(
+                                                      color: Theme.of(context)
+                                                          .hintColor,
+                                                      spreadRadius: 1,
+                                                      blurRadius: 1,
+                                                      offset:
+                                                          const Offset(0, 1),
+                                                    )
+                                                  ],
+                                                ),
+                                                child: Padding(
+                                                  padding: const EdgeInsets.all(
+                                                      Dimensions
+                                                          .paddingSizeDefault),
+                                                  child: Row(children: [
+                                                    SizedBox(
+                                                        width: Dimensions
+                                                            .iconSizeMedium,
+                                                        child: Image.asset(
+                                                            Images.car)),
+                                                    const SizedBox(
+                                                        width: Dimensions
+                                                            .paddingSizeSmall),
+                                                    Expanded(
+                                                        child: Text(
+                                                      profileController
+                                                          .listOfDocuments[
+                                                              index]
+                                                          .file.files
+                                                          .first
+                                                          .name,
+                                                      maxLines: 1,
+                                                      overflow:
+                                                          TextOverflow.ellipsis,
+                                                    )),
+                                                    const Icon(Icons.clear,
+                                                        color: Colors.red,
+                                                        size: 20)
+                                                  ]),
+                                                ),
+                                              ),
+                                            ),
+                                          );
+                                        },
+                                      ),
+                                    // const SizedBox(height: Dimensions.paddingSizeLarge),
+                                    profileController.creating
+                                        ? Row(
+                                            mainAxisAlignment:
+                                                MainAxisAlignment.center,
+                                            children: [
+                                                SpinKitCircle(
+                                                    color: Theme.of(context)
+                                                        .primaryColor,
+                                                    size: 40.0),
+                                              ])
+                                        : ButtonWidget(
+                                            fontWeight: FontWeight.w700,
+                                            fontSize:
+                                                Dimensions.radiusExtraLarge,
+                                            radius: Dimensions.radiusExtraLarge,
+                                            buttonText:
+                                                widget.vehicleInfo == null
+                                                    ? 'vehicle_setup'.tr
+                                                    : 'update'.tr,
+                                            onPressed: () {
+                                              String brandId = profileController
+                                                  .selectedBrand!.id!;
+                                              String modelId = profileController
+                                                  .selectedModel.id!;
+                                              String categoryId =
+                                                  profileController
+                                                      .selectedCategory.id!;
+                                              String licencePlateNumber =
+                                                  licencePlateNumberController
+                                                      .text
+                                                      .trim();
+                                              String expireDate =
+                                                  profileController.dateFormat
+                                                      .format(profileController
+                                                              .startDate ??
+                                                          DateTime.now())
+                                                      .toString();
+                                              String vinNumber =
+                                                  vinNumberController.text
+                                                      .trim();
+                                              String transmission =
+                                                  transmissionController.text
+                                                      .trim();
+                                              String fuelType =
+                                                  profileController
+                                                      .selectedFuelType;
+
+                                              // Validation
+                                              if (profileController
+                                                      .selectedBrand!.id ==
+                                                  'abc') {
+                                                showCustomSnackBar(
+                                                    'select_vehicle_brand'.tr);
+                                              } else if (profileController
+                                                      .selectedModel.id ==
+                                                  'abc') {
+                                                showCustomSnackBar(
+                                                    'select_vehicle_model'.tr);
+                                              } else if (profileController
+                                                      .selectedCategory.id ==
+                                                  'abc') {
+                                                showCustomSnackBar(
+                                                    'select_vehicle_category'
+                                                        .tr);
+                                              } else if (licencePlateNumber
+                                                  .isEmpty) {
+                                                showCustomSnackBar(
+                                                    'licence_plate_number_is_required'
+                                                        .tr);
+                                              } else if (profileController
+                                                      .startDate ==
+                                                  null) {
+                                                showCustomSnackBar(
+                                                    'expire_date_is_required'
+                                                        .tr);
+                                              } else if (fuelType ==
+                                                  'select_fuel_type') {
+                                                showCustomSnackBar(
+                                                    'fuel_type_is_required'.tr);
+                                              } else if (profileController
+                                                  .documents.isEmpty) {
+                                                showCustomSnackBar(
+                                                    'please_upload_required_documents'
+                                                        .tr);
+                                              } else {
+                                                AddCarBodyModel body =
+                                                    AddCarBodyModel(
+                                                        brandId: brandId,
+                                                        modelId: modelId,
+                                                        categoryId: categoryId,
+                                                        licencePlateNumber:
+                                                            licencePlateNumber,
+                                                        licenceExpireDate:
+                                                            expireDate,
+                                                        vinNumber: vinNumber,
+                                                        transmission:
+                                                            transmission,
+                                                        fuelType: fuelType,
+                                                        driverId:
+                                                            profileController
+                                                                    .profileInfo
+                                                                    ?.id ??
+                                                                "123456789",
+                                                        ownership: 'driver',
+                                                        parcelCapacityWeight:
+                                                            parcelWeightCapacity
+                                                                .text
+                                                                .trim());
+
+                                                if (widget.vehicleInfo ==
+                                                    null) {
+                                                  profileController
+                                                      .addNewVehicle(body);
+                                                } else {
+                                                  profileController
+                                                      .updateVehicle(
+                                                          body,
+                                                          Get.find<
+                                                                  AddCarController>()
+                                                              .driverId)
+                                                      .then((onValue) {
+                                                    if (onValue.statusCode ==
+                                                        200) {
+                                                      Get.back();
+                                                    } else {
+                                                      showCustomSnackBar(
+                                                          'retry'.tr);
+                                                    }
+                                                  });
+                                                }
+                                              }
+                                            },
+                                          ),
+                                    const SizedBox(
+                                        height:
+                                            Dimensions.paddingSizeExtraLarge),
+                                  ]),
+                            ),
+                          );
+                  },
+                );
+        }),
+      ),
+    );
+  }
+
+  Widget _defaultAddDocument({
+    required AddCarController controller,
+    required String nameDocument,
+    required String keyName,
+  }) {
+    return Container(
+      padding: const EdgeInsets.all(Dimensions.paddingSizeSmall),
+      width: MediaQuery.of(context).size.width,
+      height: MediaQuery.of(context).size.height * 0.06,
+      decoration: BoxDecoration(
+          color: Theme.of(context).cardColor,
+          border: Border.all(color: Theme.of(context).hintColor),
+          borderRadius: BorderRadius.circular(Dimensions.paddingSizeDefault)),
+      child: InkWell(
+        onTap: () async {
+          bool res = await controller.pickOtherFile(keyName);
+          if (res) {
+            controller.documents.removeWhere((doc) => doc.key == keyName);
+            controller.documents
+                .add(MultipartDocument(keyName, controller.objFile!));
+            _scrollDown();
+          }
+        },
+        child: Builder(builder: (context) {
+          return Row(
+            mainAxisAlignment: MainAxisAlignment.center,
+            crossAxisAlignment: CrossAxisAlignment.center,
+            children: [
+              Text(nameDocument,
+                  style: textRegular.copyWith(
+                    fontSize: Dimensions.fontSizeDefault,
+                    color: Theme.of(context).textTheme.labelMedium!.color,
+                  )),
+              Spacer(),
+              Image.asset(
+                Images.addImageIcon,
+                width: MediaQuery.of(context).size.width * 0.07,
+              ),
+              controller.selectedFileForImport != null
+                  ? Text(controller.objFile?.name ?? 'upload_file'.tr,
+                      maxLines: 2, overflow: TextOverflow.ellipsis)
+                  : Text('upload_file'.tr, style: textRegular.copyWith()),
+            ],
+          );
+        }),
+      ),
+    );
+  }
+}
